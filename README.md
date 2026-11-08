@@ -81,3 +81,4 @@ MIT（仅覆盖本仓库的脚本与文档，不含任何第三方插件代码�
 [docs/full-walkthrough.md](docs/full-walkthrough.md) 记录了从零接入的全部步骤：协议链路、PoW、认证体系、工具调用翻译、崩溃排查、性能实测，以及风控观察。
 
 > 实测结论：这套路线可用，但程序化访问会触发账号风控（我们遇到的是禁言 3 天）。仅作协议学习，不建议作为生产力车道。
+- [docs/risk-control-lessons.md](docs/risk-control-lessons.md)：风控检测面、四条硬约束与可迁移的爬虫方法论
