@@ -11,7 +11,9 @@ node_modules/
 
 # 任何凭据/令牌
 *.credentials*
-token*
+token.json
+*.tokens
+tokens/
 secret*
 .env
 .env.*
