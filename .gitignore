@@ -1,0 +1,23 @@
+# 本地运行产物，绝不入库
+*.log
+pow-error.log
+health.jsonl
+state.json
+ALERT.txt
+*.bak-*
+*.bak-compat
+captures/
+node_modules/
+
+# 任何凭据/令牌
+*.credentials*
+token*
+secret*
+.env
+.env.*
+
+# 编辑器/系统
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
