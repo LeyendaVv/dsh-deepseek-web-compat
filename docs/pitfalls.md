@@ -53,3 +53,15 @@
 ## 9. 不要把网页版设成唯一模型
 
 接口是私有的，改版是迟早的事。一旦它挂了，最坏后果应是"这条车道报错"，而不是"应用起不来"。所以：默认模型保留一条正常车道（官方 API / 其它 provider），网页版按需切换。
+
+## 10. 顶层报 "DeepSeek Web request failed / UNKNOWN"
+
+**现象**：界面只显示 `本轮运行失败 / DeepSeek Web request failed / UNKNOWN`，看不出是登录问题。
+**根因**：错误发生在 `currentUser()` 这条路径上，走的是未分类的 `throwIfProtocolError()`；服务端返回 `{"code":40003}` 被当成协议错误，DSH 又不认识 `DEEPSEEK_WEB_PROTOCOL`，最终显示 UNKNOWN。
+**处理**：补丁 A4 —— `currentUser()` 也按业务码分类，40002/40003 直接抛 `REAUTH_REQUIRED`，界面变成"登录态失效，请重新登录"。
+
+## 11. token 大约 1 小时就失效
+
+**实测**：15:25 拿到的新 token，16:31 起连续返回 40003。有效期约 66 分钟。
+**含义**：这不是 bug，是网页 token 的寿命。轮换写回（A2/B3）只能减少"明明服务端换过 token 却还存着更旧那个"的情况，**不能延长 token 本身的有效期**。
+**处理**：失效就重新登录；用 `diag.mjs health --interval 600` 盯着，失效时弹通知，避免任务跑到一半才发现。

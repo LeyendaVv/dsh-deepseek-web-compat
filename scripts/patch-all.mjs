@@ -109,6 +109,25 @@ edit(CFG, 'warmup()?.catch', `\t\tthis.pow.warmup();
 \t\tloadProtocolCore().catch(() => {});`,
   'A3 构造器两处 promise 兜底');
 
+// A4. current_user 失败同样按业务码分类（否则 token 失效会变成笼统的 "request failed"/UNKNOWN）
+edit(CFG, 'current_user 失败时也按业务码分类', `\tthrowIfProtocolError(parsed);
+\tif (parsed.response.type !== "account")`,
+`\tif (!parsed.ok) {
+\t\tlet serverCode;
+\t\tlet serverMsg = "";
+\t\ttry {
+\t\t\tconst b = JSON.parse(String(raw?.text ?? "").trim());
+\t\t\tif (typeof b?.code === "number") serverCode = b.code;
+\t\t\tif (typeof b?.msg === "string") serverMsg = b.msg;
+\t\t} catch {}
+\t\tif (serverCode === 40002 || serverCode === 40003) {
+\t\t\tthrow new DeepSeekWebError("DeepSeek Web 登录态失效（code " + serverCode + " " + serverMsg + "），请重新登录", ERROR_CODES.REAUTH_REQUIRED, { status: raw?.status });
+\t\t}
+\t\tthrow new DeepSeekWebError("DeepSeek Web 账号校验失败（code " + (serverCode ?? "?") + " " + serverMsg + "）", ERROR_CODES.AUTH, { status: raw?.status });
+\t}
+\tif (parsed.response.type !== "account")`,
+  'A4 currentUser 按业务码分类');
+
 // ─────────────────────────── B. 适配器层（index.js）───────────────────────────
 
 // B1. powHeaderPromise 提前发起，没人 await 时会变成未处理拒绝
